@@ -1,0 +1,11 @@
+1. Ir a edit, proyect setting, editory fijarse que esté en force text.
+
+2. además recordar ir a file > build settings
+escoger las 3 escenas  map, menu y default que esta en el folder de scenes
+y ponerlas ahí.
+
+3. agregar las tags:
+SceneryRock
+SceneryBush
+SceneryTree
+con las respectivas mayusculas al documento. 
