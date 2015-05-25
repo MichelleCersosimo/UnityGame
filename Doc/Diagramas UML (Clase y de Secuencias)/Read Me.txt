@@ -1,0 +1,8 @@
+El archivo .rar es por si no se logra abrir el archivo Zipped.
+Al guardar un archivo MagicDraw, se adjunta con el un .mdzip.bak
+Que puede ser ignorado por github, por ende mejor pasar un .rar 
+para asegurar que el modelo llegue bien. 
+
+Si agregan otro diagrama de secuencia o se actualiza el de clase,
+favor también realizar nuevamente el .rar
+

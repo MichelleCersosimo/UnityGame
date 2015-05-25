@@ -1,0 +1,64 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class ActionWaterPH : MonoBehaviour {
+
+	GameObject player;
+	GameObject txt;
+		
+	public void performAction(GameObject pnl,GameObject pnl2) {
+		pnl.SetActive(false);
+		pnl2.SetActive(true);
+		txt= GameObject.Find ("Analisis");
+		txt.GetComponent<ChangeText> ().Change();
+		pnl2.transform.position = new Vector3(390, 280, 0);
+				
+	}
+
+	//Cambiar el llamado a este SelectPH
+	public string SelectPH(string resultado){
+
+			float choice = Random.Range(0.0F, 14.0F);
+			
+		if(choice > 0.0 && choice < 2.5){
+			resultado="ab";
+
+		}else{
+			if(choice > 2.6 && choice < 4.9){
+				resultado="cd";
+				
+			}else{
+				if(choice > 5.0 && choice < 5.5){
+					resultado="ef";
+					
+				}else{
+					if(choice > 5.6 && choice < 6.0){
+						resultado="gh";
+						
+					}else{
+						if(choice > 6.1 && choice < 7.0){
+							resultado="ij";
+							
+						}else{
+							if(choice > 7.1 && choice < 10.0){
+								resultado="kl";
+								
+							}else{
+								if(choice > 10.1 && choice < 11.5){
+									resultado="mn";
+									
+								}else{
+									if(choice > 11.6 && choice < 14.0){
+										resultado="op";
+										
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return resultado;
+	}
+}
