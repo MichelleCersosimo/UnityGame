@@ -32,6 +32,92 @@ public class MapLoader {
 
 	}
 
+	public List<TileType[,]> getTileTypeMapList (int chunk_side_length) {
+	
+		List<TileType[,]> tile_types = new List<TileType[,]> ();
+		
+		if (size_x % chunk_side_length != 0 || size_x != size_y) {
+			Debug.LogError("Error 1A");
+			return tile_types;
+		}
+		
+		int side_chunks = size_x / chunk_side_length;
+		TileType[,] chTypes = getTileTypes ();
+
+		for(int i = 0; i < side_chunks; ++i) {
+			for(int j = 0; j < side_chunks; ++j) {
+				
+				TileType[,] chunk_types = new TileType[chunk_side_length, chunk_side_length];
+				for(int m = 0; m < chunk_side_length; ++m) {
+					for(int n = 0; n < chunk_side_length; ++n) {
+						
+						chunk_types[m, n] = chTypes[i * chunk_side_length + m, j * chunk_side_length + n];
+						
+					}
+				}
+				tile_types.Add (chunk_types);
+				
+			}
+		}
+		
+		return tile_types;
+
+	}
+
+	private TileType[,] getTileTypes () {
+	
+		Color[] pix = loadedImage.GetPixels();
+		TileType[,] types = new TileType[size_y, size_x];
+		for (int i = 0; i < size_y; ++i) {
+			for(int j = 0; j < size_x; ++j) {
+				types[i, j] = getTypeFromColor(pix[i * size_y + j]);
+			}
+		}
+
+		return types;
+
+	}
+
+	private TileType getTypeFromColor(Color color) {
+
+		Vector3 rgb = convertColorToStandard (new Vector3 (color.r, color.g, color.b));
+	
+		if(rgb.x == 186 && rgb.y == 77 && rgb.z == 187) {
+			// Pink
+		}
+
+		if(rgb.x == 0 && rgb.y == 136 && rgb.z == 45) {
+			// Bluish green
+			return TileType.high_zone;
+		}
+
+		if(rgb.x == 129 && rgb.y == 187 && rgb.z == 77) {
+			// Yellowish green
+			return TileType.medium_zone;
+		}
+
+		if(rgb.x == 145 && rgb.y == 110 && rgb.z == 74) {
+			// Brown
+			return TileType.dirt;
+		}
+
+		if(rgb.x == 89 && rgb.y == 105 && rgb.z == 114) {
+			// Brown
+			return TileType.rocky;
+		}
+
+		return TileType.high_zone;
+	
+	}
+
+	private Vector3 convertColorFromStandard(Vector3 color_standard) {
+		return new Vector3(color_standard.x/255.0f, color_standard.y/255.0f, color_standard.z/255.0f);
+	}
+
+	private Vector3 convertColorToStandard(Vector3 color_norm) {
+		return new Vector3( (int) (color_norm.x*255.0f), (int) (color_norm.y*255.0f), (int) (color_norm.z*255.0f) );
+	}
+
 	public List<int[,]> getLevelMapList (int level_count, float grayscale_zero, int chunk_side_length, out int chunks_x, out int chunks_y) {
 
 		setLevels(level_count, grayscale_zero);

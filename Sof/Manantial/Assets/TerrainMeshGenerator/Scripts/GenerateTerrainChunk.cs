@@ -25,6 +25,7 @@ public class GenerateTerrainChunk : MonoBehaviour {
 	private int terrain_chunks_x;
 	private int terrain_chunks_y;
 	private LevelMap[,] WorldLevelMaps;
+	private TileTypeMap[,] WorldTileTypeMaps;
 
 	private MeshFilter mesh_filter;
 	private MeshCollider mesh_collider;
@@ -44,7 +45,7 @@ public class GenerateTerrainChunk : MonoBehaviour {
 	public bool isValid = true;
 
 	// generates all terrain chunk data
-	public void generate(int index_x, int index_y, float tile_size, float slope_height, int side_tile_count, Vector3 chunk_origin, Vector3 chunk_center, ref LevelMap[,] WorldLevelMaps, int terrain_chunks_x, int terrain_chunks_y, int textures_x, int textures_y, ref List<int[]> neighbor_level_maps, MeshFilter m_filter) {
+	public void generate(int index_x, int index_y, float tile_size, float slope_height, int side_tile_count, Vector3 chunk_origin, Vector3 chunk_center, ref LevelMap[,] WorldLevelMaps, TileTypeMap[,] WorldTileTypeMaps, int terrain_chunks_x, int terrain_chunks_y, int textures_x, int textures_y, ref List<int[]> neighbor_level_maps, MeshFilter m_filter) {
 
 		this.index_x = index_x;
 		this.index_y = index_y;
@@ -58,6 +59,7 @@ public class GenerateTerrainChunk : MonoBehaviour {
 		this.textures_x = textures_x;
 		this.textures_y = textures_y;
 		this.WorldLevelMaps = WorldLevelMaps;
+		this.WorldTileTypeMaps = WorldTileTypeMaps;
 		int zona = 0;
 		gameObject.transform.position = origin;
 
@@ -67,14 +69,14 @@ public class GenerateTerrainChunk : MonoBehaviour {
 		if (index_x == 0 && index_y == 14) {  // 1 9
 			// zona rural = 1
 			zona = 1; 
-			tc = new TerrainChunk (origin, side_tile_count, tile_size, slope_height, ref WorldLevelMaps[index_y, index_x].levels, textures_x, textures_y, ref neighbor_level_maps, mesh_filter, zona);
+			tc = new TerrainChunk (origin, side_tile_count, tile_size, slope_height, ref WorldLevelMaps[index_y, index_x].levels, WorldTileTypeMaps[index_y, index_x].ttypes, textures_x, textures_y, ref neighbor_level_maps, mesh_filter, zona);
 		} else if (index_x == 11 && index_y == 0) { //2 15
 			// zona ciudad = 2
 			zona = 2;
-			tc = new TerrainChunk (origin, side_tile_count, tile_size, slope_height, ref WorldLevelMaps[index_y, index_x].levels, textures_x, textures_y, ref neighbor_level_maps, mesh_filter, zona);
+			tc = new TerrainChunk (origin, side_tile_count, tile_size, slope_height, ref WorldLevelMaps[index_y, index_x].levels, WorldTileTypeMaps[index_y, index_x].ttypes, textures_x, textures_y, ref neighbor_level_maps, mesh_filter, zona);
 		} else {
 			// default no zone 0 
-			tc = new TerrainChunk (origin, side_tile_count, tile_size, slope_height, ref WorldLevelMaps[index_y, index_x].levels, textures_x, textures_y, ref neighbor_level_maps, mesh_filter, zona);
+			tc = new TerrainChunk (origin, side_tile_count, tile_size, slope_height, ref WorldLevelMaps[index_y, index_x].levels, WorldTileTypeMaps[index_y, index_x].ttypes, textures_x, textures_y, ref neighbor_level_maps, mesh_filter, zona);
 		}
 		mesh = tc.getMesh ();
 		bounds = mesh.bounds;
@@ -195,6 +197,11 @@ public class GenerateTerrainChunk : MonoBehaviour {
 		bool freeSpace = tc.getSceneryMap () [lmap_index_x, lmap_index_y] == GameController.gameController.spriteMapper.getEmpty();
 		freeSpace = freeSpace && tc.getPathMap () [lmap_index_x, lmap_index_y] == PathType.empty;
 		return freeSpace && tc.isSuitableForScenery (lmap_index_y, lmap_index_x);
+	}
+
+	public bool tileIsSuitableForBridge(int lmap_index_x, int lmap_index_y) {
+		bool freeSpace = tc.getPathMap () [lmap_index_x, lmap_index_y] == PathType.empty;
+		return freeSpace && tc.isSuitableForBridge (lmap_index_y, lmap_index_x);
 	}
 
 	void LateUpdate() {

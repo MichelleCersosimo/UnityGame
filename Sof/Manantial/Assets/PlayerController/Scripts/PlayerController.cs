@@ -318,7 +318,7 @@ public class PlayerController : MonoBehaviour {
 		builderItems.addItem (new Shovel());
 		builderItems.addItem (new Hammer());
 		builderItems.addItem (new Nails(),15);
-		builderItems.addItem (new Wood(),10);
+		builderItems.addItem (new Wood(),40);
 		builderItems.addItem (new Sapling(),8);
 		
 		PlayerItems scientistItems = scientist.GetComponent<PlayerItems> ();

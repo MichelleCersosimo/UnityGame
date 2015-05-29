@@ -18,7 +18,9 @@ public enum TextureType { grass, dirt };
 // Type of scenery object
 public enum SceneryType { empty, tree1, tree2, tree3, tree4, tree5, bush1, bush2, bush3, bush4, bush5, piedra1, piedra2, casa1, granjita, zonarural, zonarural2, zonaruralsingranjas, zonaciudad, zonaciudad2, zonaciudad3, alcatraz, bigHouse1, fuente, mercado, molino, police, residencial, stores, templo, treePink, vereda};
 
-public enum PathType { empty, path1 };
+public enum PathType { empty, path1, bridge };
+
+public enum TileType { high_zone, medium_zone, low_zone, beach, dirt, rocky, urban_area, rural_area };
 
 public class TerrainChunk {
 	
@@ -67,6 +69,9 @@ public class TerrainChunk {
 	private int[,] level_map;
 	private List<int[]> neighbor_level_maps; 
 
+	// tile type map: associates a TileType for every tile
+	private TileType[,] tile_type_map;
+
 	// surface level: Y position of water surface
 	private float surface_level = -0.01f;
 
@@ -114,8 +119,8 @@ public class TerrainChunk {
 	
 	bool isValid = false;
 	
-	public TerrainChunk(Vector3 origin, int side_tile_count, float tile_size, float slope_height, ref int[,] level_map, int num_textures_x, int num_textures_y,  ref List<int[]> neighbor_level_maps, MeshFilter mesh_filter, int zona) {
-		setAttributes (origin, side_tile_count, tile_size, slope_height, ref level_map, num_textures_x, num_textures_y, ref neighbor_level_maps, mesh_filter, zona);
+	public TerrainChunk(Vector3 origin, int side_tile_count, float tile_size, float slope_height, ref int[,] level_map, TileType[,] tile_type_map, int num_textures_x, int num_textures_y,  ref List<int[]> neighbor_level_maps, MeshFilter mesh_filter, int zona) {
+		setAttributes (origin, side_tile_count, tile_size, slope_height, ref level_map, tile_type_map, num_textures_x, num_textures_y, ref neighbor_level_maps, mesh_filter, zona);
 		generateMesh ();
 	}
 	
@@ -124,7 +129,7 @@ public class TerrainChunk {
 	}
 
 	// set initial attributes. happens only once on object initialization.
-	public void setAttributes(Vector3 origin, int side_tile_count, float tile_size, float slope_height, ref int[,] level_map, int textures_x, int textures_y,  ref List<int[]> neighbor_level_maps, MeshFilter mesh_filter, int zona) {
+	public void setAttributes(Vector3 origin, int side_tile_count, float tile_size, float slope_height, ref int[,] level_map, TileType[,] tile_type_map, int textures_x, int textures_y,  ref List<int[]> neighbor_level_maps, MeshFilter mesh_filter, int zona) {
 		
 		if (level_map.Length == side_tile_count * side_tile_count) {
 			this.origin = origin;
@@ -134,6 +139,7 @@ public class TerrainChunk {
 			this.tile_size = tile_size;
 			this.slope_height = slope_height;
 			this.level_map = level_map;
+			this.tile_type_map = tile_type_map;
 			this.neighbor_level_maps = neighbor_level_maps;
 			this.tri_div_conf_map = setTriDivConfMap (level_map);
 			this.brightness_map = setBrightnessMap (level_map);
@@ -286,14 +292,25 @@ public class TerrainChunk {
 			}
 			
 			Vector2 texture_type_indexes;
+
+			if(tile_type_map[lmap_index_y, lmap_index_x] == TileType.dirt) {
+				texture_type_indexes = getTextureRowIndexes(TextureType.dirt);
+			} else if(tile_type_map[lmap_index_y, lmap_index_x] == TileType.high_zone) {
+				texture_type_indexes = getTextureRowIndexes(TextureType.grass);
+			} else if(tile_type_map[lmap_index_y, lmap_index_x] == TileType.medium_zone) {
+				texture_type_indexes = getTextureRowIndexes(TextureType.grass);
+			} else if(tile_type_map[lmap_index_y, lmap_index_x] == TileType.rocky) {
+				texture_type_indexes = getTextureRowIndexes(TextureType.dirt);
+			} else {
+				// Otherwise set texture as grass.
+				texture_type_indexes = getTextureRowIndexes(TextureType.grass);
+			}
+
 			if(verts_below_zero > 1) {
 				// If more than 1 vertex has height below zero, set texture as dirt.
 				texture_type_indexes = getTextureRowIndexes(TextureType.dirt);
 			}
-			else {
-				// Otherwise set texture as grass.
-				texture_type_indexes = getTextureRowIndexes(TextureType.grass);
-			}
+
 			
 			int t_index_y = (int) UnityEngine.Random.Range(texture_type_indexes.x, texture_type_indexes.y+1);
 			int t_index_x = (int) UnityEngine.Random.Range(0, num_textures_x);
@@ -435,6 +452,15 @@ public class TerrainChunk {
 
 	}
 
+	private void positionBridgeOnChunk(ref GameObject obj, int map_index_x, int map_index_y, out Vector3 position) {
+		
+		position = new Vector3 (
+			origin.x + map_index_x * tile_size + tile_size/2, 
+			surface_level + 0.03f, 
+			origin.z - map_index_y * tile_size - tile_size/2
+			);
+	}
+
 	// positions a scenery object on the terrain
 	private void positionSceneryObj(ref GameObject obj, int map_index_x, int map_index_y) {
 		Vector3 position = new Vector3 ();
@@ -448,7 +474,13 @@ public class TerrainChunk {
 	private void positionPathObj(ref GameObject obj, int map_index_x, int map_index_y) {
 		Vector3 position = new Vector3 ();
 		Vector3 collider_position = new Vector3 ();
-		positionObjectOnChunk (ref obj, map_index_x, map_index_y, out position, out collider_position);
+
+		if (path_map [map_index_y, map_index_x] != PathType.bridge) {
+			positionObjectOnChunk (ref obj, map_index_x, map_index_y, out position, out collider_position);
+		} else {
+			positionBridgeOnChunk (ref obj, map_index_x, map_index_y, out position);
+		}
+
 		obj.transform.position = position;
 	}
 
@@ -739,8 +771,10 @@ public class TerrainChunk {
 			int rand_index_y = UnityEngine.Random.Range(0, side_tile_count);
 			
 			if(isSuitableForScenery(rand_index_x, rand_index_y) && (result[rand_index_y, rand_index_x] == GameController.gameController.spriteMapper.getEmpty ())){ // && noHouses(rand_index_y, rand_index_x)) {
-				int sprite_id = GameController.gameController.spriteMapper.getRandomVegetation();
-				result[rand_index_y, rand_index_x] = sprite_id;
+				int sprite_id = GameController.gameController.spriteMapper.getRandomVegetation(tile_type_map[rand_index_y, rand_index_x]);
+				if(sprite_id >= 0) {
+					result[rand_index_y, rand_index_x] = sprite_id;
+				}
 			}
 			
 		}
@@ -799,6 +833,17 @@ public class TerrainChunk {
 	public bool isSuitableForScenery(int lmap_index_x, int lmap_index_y) {
 		
 		if(tileIsFlat(lmap_index_x, lmap_index_y) && !tileHeightIsLowerThanMinVert(lmap_index_x, lmap_index_y) && level_map[lmap_index_y, lmap_index_x] >= surface_level) {
+			return true;
+		}
+		
+		return false;
+		
+	}
+
+	// checks if a tile is suitable for bridge placement
+	public bool isSuitableForBridge(int lmap_index_x, int lmap_index_y) {
+		
+		if( level_map[lmap_index_y, lmap_index_x] < surface_level) {
 			return true;
 		}
 		

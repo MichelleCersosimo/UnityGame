@@ -11,7 +11,7 @@ public class ActionWaterPH : MonoBehaviour {
 		pnl2.SetActive(true);
 		txt= GameObject.Find ("Analisis");
 		txt.GetComponent<ChangeText> ().Change();
-		pnl2.transform.position = new Vector3(390, 280, 0);
+		pnl2.transform.position = new Vector3(Screen.width/2,((Screen.height-155)/2)+155, 0);
 				
 	}
 

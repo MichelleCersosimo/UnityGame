@@ -16,6 +16,7 @@ public class GenerateTerrain : MonoBehaviour {
 	//public string heightmap_path = "/Resources/Heightmaps/mesa_heightmap_blur.jpg";
 	//public string heightmap_path = "/Resources/Heightmaps/mesa_heightmap.jpg";
 	public string heightmap_path = "/Resources/Heightmaps/mesa_heightmap_big.jpg";
+	public string tileTypeMap_path = "/Resources/TileTypeMaps/mesa_ttypemap_big.png";
 	public int textures_x = 3;
 	public int textures_y = 3;
 	public int texture_size_x = 384;
@@ -26,6 +27,7 @@ public class GenerateTerrain : MonoBehaviour {
 	
 
 	private LevelMap[,] WorldLevelMaps;
+	private TileTypeMap[,] WorldTileTypeMaps;
 
 	private float slope_height;
 
@@ -89,9 +91,14 @@ public class GenerateTerrain : MonoBehaviour {
 		MapLoader mloader = new MapLoader ();
 		mloader.openFile (texture_size_x, texture_size_y, heightmap_path);
 		List<int[,]> lmaps = mloader.getLevelMapList (level_count, level_zero_grayscale, side_tile_count, out terrain_chunks_x, out terrain_chunks_y);
-		
+
+		mloader = new MapLoader ();
+		mloader.openFile (texture_size_x, texture_size_y, tileTypeMap_path);
+		List<TileType[,]> ttmaps = mloader.getTileTypeMapList (side_tile_count);
+
 		WorldLevelMaps = setWorldLevelMaps (ref lmaps, terrain_chunks_x, terrain_chunks_y);
-		
+		WorldTileTypeMaps = setWorldTileTypeMaps (ref ttmaps, terrain_chunks_x, terrain_chunks_y);
+
 		initSceneryObjPool ();
 		initPathObjPool ();
 		loaded_chunks = new TC_HashTable(terrain_chunks_x * terrain_chunks_y, terrain_chunks_x, terrain_chunks_x, terrain_chunks_y);
@@ -118,7 +125,7 @@ public class GenerateTerrain : MonoBehaviour {
 				GameObject new_terrain_chunk = (GameObject) Instantiate(TerrainChunk_Prefab);
 				new_terrain_chunk.transform.parent = transform;
 				GenerateTerrainChunk generator = new_terrain_chunk.GetComponent<GenerateTerrainChunk> ();
-				generator.generate (index_x, index_y, tile_size, slope_height, side_tile_count, chunk_origin, chunk_center, ref WorldLevelMaps, terrain_chunks_x, terrain_chunks_y, textures_x, textures_y, ref neighbor_level_maps, new_terrain_chunk.GetComponent<MeshFilter> ());
+				generator.generate (index_x, index_y, tile_size, slope_height, side_tile_count, chunk_origin, chunk_center, ref WorldLevelMaps, WorldTileTypeMaps, terrain_chunks_x, terrain_chunks_y, textures_x, textures_y, ref neighbor_level_maps, new_terrain_chunk.GetComponent<MeshFilter> ());
 				
 				GameObject new_ws_chunk = (GameObject) Instantiate(WaterSurfaceChunk_Prefab);
 				new_ws_chunk.transform.parent = new_terrain_chunk.transform;
@@ -351,6 +358,13 @@ public class GenerateTerrain : MonoBehaviour {
 		
 	}
 
+	public bool tileIsSuitableForBridge(int chunk_index_x, int chunk_index_y, int tile_index_x, int tile_index_y) {
+		
+		TChunk chunk = loaded_chunks.getElem (chunk_index_x, chunk_index_y);
+		return chunk.generator.tileIsSuitableForBridge (tile_index_x, tile_index_y);
+		
+	}
+
 	private LevelMap[,] setWorldLevelMaps(ref List<int[,]> lmaps, int t_chunks_x, int t_chunks_y) {
 		
 		int counter = 0;
@@ -366,6 +380,24 @@ public class GenerateTerrain : MonoBehaviour {
 		}
 		
 		return WorldLevelMaps;
+		
+	}
+
+	private TileTypeMap[,] setWorldTileTypeMaps(ref List<TileType[,]> wttmaps, int t_chunks_x, int t_chunks_y) {
+		
+		int counter = 0;
+		TileTypeMap[,] WorldTTypeMaps = new TileTypeMap[t_chunks_y, t_chunks_x];
+		for (int i = 0; i < t_chunks_y; ++i) {
+			for(int j = 0; j < t_chunks_x; ++j) {
+				TileType[,] ttmap = wttmaps[counter];
+				TileTypeMap map = new TileTypeMap();
+				map.setTTypeMap(j, i, ref ttmap);
+				WorldTTypeMaps[i, j] = map;
+				++counter;
+			}
+		}
+		
+		return WorldTTypeMaps;
 		
 	}
 	
@@ -705,6 +737,22 @@ public struct LevelMap {
 	public int index_y;
 	public void setLevelMap(int ind_x, int ind_y, ref int[,] lmap) {
 		levels = lmap;
+		// chunk indexes in the world
+		index_x = ind_x;
+		index_y = ind_y;
+	}
+	public void invalidate() {
+		index_x = -1;
+		index_y = -1;
+	}
+};
+
+public struct TileTypeMap {
+	public TileType[,] ttypes;
+	public int index_x;
+	public int index_y;
+	public void setTTypeMap(int ind_x, int ind_y, ref TileType[,] ttpmap) {
+		ttypes = ttpmap;
 		// chunk indexes in the world
 		index_x = ind_x;
 		index_y = ind_y;

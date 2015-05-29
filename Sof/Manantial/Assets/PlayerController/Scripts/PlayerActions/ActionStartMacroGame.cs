@@ -3,7 +3,6 @@ using System.Collections;
 
 public class ActionStartMacroGame : MonoBehaviour {
 
-	public static GameObject Action_Start_Macro_Game;
 	GameObject player;
 	bool error;
 	public TogglePanelButton slave; 
@@ -31,7 +30,7 @@ public class ActionStartMacroGame : MonoBehaviour {
 		pnl2.SetActive(true);
 		//txt= GameObject.Find ("Analisis");
 		//txt.GetComponent<ChangeText> ().Change();
-		pnl2.transform.position = new Vector3(250, 375, 0);
+		pnl2.transform.position = new Vector3(Screen.width/2,((Screen.height-155)/2)+155, 0);
 		
 	}
 
@@ -40,7 +39,7 @@ public class ActionStartMacroGame : MonoBehaviour {
 		pnl2.SetActive(true);
 		//txt= GameObject.Find ("Analisis");
 		//txt.GetComponent<ChangeText> ().Change();
-		pnl2.transform.position = new Vector3(250, 375, 0);
+		pnl2.transform.position = new Vector3(Screen.width/2,((Screen.height-155)/2)+155, 0);
 		
 	}
 

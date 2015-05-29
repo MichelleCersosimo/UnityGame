@@ -19,7 +19,10 @@ public class SetActionsMiniMenu : MonoBehaviour {
 			button0.GetComponent<Button>().onClick.RemoveAllListeners();
 			button0.GetComponent<Button>().onClick.AddListener(() => GameController.gameController.playerActionsHolder.GetComponent<ActionPlantSapling> ().performAction(playerController.currentCharacter));
 
-			button1.SetActive(false);
+			button1.SetActive(true);
+			button1.GetComponentsInChildren<Text>()[0].text = "Construir Puente";
+			button1.GetComponent<Button>().onClick.RemoveAllListeners();
+			button1.GetComponent<Button>().onClick.AddListener(() => GameController.gameController.playerActionsHolder.GetComponent<ActionCreateBridge> ().performAction(playerController.currentCharacter));
 
 			button2.SetActive(false);
 

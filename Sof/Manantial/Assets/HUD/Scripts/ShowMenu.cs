@@ -8,11 +8,12 @@ public class ShowMenu : MonoBehaviour {
 
 	public GameObject panel;
 	public GameObject panel2;
-		public GameObject panel3;
-				public GameObject panel4;
+	public GameObject panel3;
+	public GameObject panel4;
 	public int cont=0;
 	public int cont1=0;
-		public int cont2=0;
+	public int cont2=0;
+
 	public RectTransform canvasRT;
 	private RectTransform panelRT;
 
