@@ -10,4 +10,5 @@ SceneryRock
 SceneryBush
 SceneryTree
 Card
+CardPanel
 con las respectivas mayusculas al documento. 
