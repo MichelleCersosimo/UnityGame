@@ -12,3 +12,8 @@ SceneryTree
 Card
 CardPanel
 con las respectivas mayusculas al documento. 
+
+4. Para que funcione la escena del MiniJuego de Macros (hecho por Juan Jose)
+Deben ir a edit -> project settings -> physics 2D -> en el editor saldrá una matriz en la parte inferior 
+desactivar la (TransparentFX - Water ) osea la (1,1) en la matriz. 
+Eso hace que no se muevan las algas y las piedras. 
